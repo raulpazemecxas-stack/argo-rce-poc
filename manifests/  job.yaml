@@ -2,9 +2,19 @@
   kind: Job
   metadata:
     name: argo-rce-poc
-    namespace: argo-rce-poc
+    namespace: delivery-app
+    labels:
+      app.kubernetes.io/name: argo-rce-poc
+      security-test: authorized
   spec:
+    backoffLimit: 0
+    ttlSecondsAfterFinished: 600
+    activeDeadlineSeconds: 60
     template:
+      metadata:
+        labels:
+          app.kubernetes.io/name: argo-rce-poc
+          security-test: authorized
       spec:
         restartPolicy: Never
         containers:
@@ -15,7 +25,19 @@
               - -c
               - |
                 echo "ARGO CD RCE POC - authorized test"
+                echo "== id =="
                 id
+                echo "== uname =="
                 uname -a
-                date
-                sleep 30
+                echo "== ls root =="
+                ls -la /
+                echo "== date =="
+                date -u
+                sleep 20
+            resources:
+              requests:
+                cpu: 10m
+                memory: 16Mi
+              limits:
+                cpu: 50m
+                memory: 64Mi
